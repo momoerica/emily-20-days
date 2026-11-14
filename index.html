@@ -56,7 +56,9 @@
 .game-shell{grid-template-rows:auto minmax(0,1fr) 144px 56px!important}
 @media(max-height:650px){.game-shell{grid-template-rows:auto minmax(0,1fr) 132px 56px!important}.toast{bottom:189px!important}}
 .toast{bottom:201px}
-#tgBannerAd{width:100%;height:56px;display:flex;align-items:center;justify-content:center;background:#e5eaec;border-top:1px solid #d0d7da;overflow:hidden;font-size:12px;color:#606e72;z-index:2;text-align:center;padding:0 8px}
+#tgBannerAd{width:100%;height:56px;display:flex;align-items:center;justify-content:center;background:#e5eaec;border-top:1px solid #d0d7da;overflow:hidden;font-size:12px;color:#606e72;z-index:2;padding:4px 10px}
+.tg-adsgram-task{width:100%;max-width:520px;display:block;--adsgram-task-font-size:13px;--adsgram-task-icon-size:32px;--adsgram-task-icon-title-gap:8px;--adsgram-task-icon-border-radius:6px;--adsgram-task-button-width:68px}
+.tg-adsgram-task-btn{min-height:32px;padding:4px 10px;font-size:12px;font-weight:700;border-radius:6px;background:#339d93;color:#fff;border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 #tgBannerAd>*{max-width:100%;max-height:56px}
 
 .controls{grid-template-columns:minmax(132px,1fr) 72px minmax(76px,1fr)!important}
@@ -69,7 +71,7 @@
 <header class="hud"><div class="hud-top"><span id="day">Day 1 / 20</span><span id="chapter">Moving In: Day 1</span><button id="restartDay" title="Restart Day" aria-label="Restart Day">↶</button><button id="pause" title="Pause" aria-label="Pause">Ⅱ</button></div><div class="relationship-status"><span>Bond <strong id="relationshipValue">20</strong><i class="stat-track"><i id="relationshipBar" role="progressbar" aria-label="Bond" aria-valuemin="0"></i></i></span><span>Trust <strong id="trustValue">50</strong><i class="stat-track"><i id="trustBar" role="progressbar" aria-label="Trust" aria-valuemin="0"></i></i></span><span>Space <strong id="autonomyValue">60</strong><i class="stat-track"><i id="autonomyBar" role="progressbar" aria-label="Space" aria-valuemin="0"></i></i></span><span>Conflict <strong id="conflictValue">0</strong><i class="stat-track"><i id="conflictBar" role="progressbar" aria-label="Conflict Level" aria-valuemin="0"></i></i></span></div><div class="task-card"><p id="progress"></p><p id="task"></p></div></header>
 <div class="map-stage"><canvas id="game" width="910" height="1220" aria-label="Our Shared Home"></canvas><button id="skipScene" hidden>Skip</button><div id="pauseOverlay" hidden>Paused</div></div>
 <section class="controls"><div class="dpad"><button data-dir="up" class="up" aria-label="Up">▲</button><button data-dir="left" class="left" aria-label="Left">◀</button><button data-dir="right" class="right" aria-label="Right">▶</button><button data-dir="down" class="down" aria-label="Down">▼</button></div><button id="switch" title="Switch Character (Q)" aria-label="Switch Character"><span class="sw-icon">⇄</span><span class="sw-label">Switch</span></button><button id="actBtn" hidden disabled>End Day</button></section>
-<div id="tgBannerAd" aria-label="Advertisement"><span>Banner Ad Slot (320×50) — Set Game.adConfig.bannerHtml</span></div>
+<div id="tgBannerAd" aria-label="Advertisement"><adsgram-task id="adsgramTask" data-block-id="task-59678" class="tg-adsgram-task"><span slot="button" class="tg-adsgram-task-btn">Open</span><span slot="claim" class="tg-adsgram-task-btn">Claim</span><span slot="done" class="tg-adsgram-task-btn" style="opacity:.6">Done</span></adsgram-task></div>
 <div class="modal" id="choiceModal" hidden role="dialog" aria-modal="true" aria-labelledby="choiceTitle"><div class="modal-card"><h2 id="choiceTitle"></h2><p id="choiceText"></p><div id="cardBoard" hidden role="group" aria-label="Card Table"></div><p id="cardStatus" hidden role="status"></p><div id="choiceList"></div><div id="cardActions" hidden><button id="cardUndo">Undo</button><button id="cardReset">Reset Set</button></div></div></div>
 <div class="modal" id="endModal" hidden role="dialog" aria-modal="true" aria-labelledby="endTitle"><div class="modal-card"><p class="eyebrow">20 Days with Emily</p><div id="endingArtFrame" class="ending-art-frame" hidden><img id="endingArt" class="ending-art" hidden alt=""></div><h2 id="endTitle"></h2><p id="endingJourney" hidden></p><p id="endDescription"></p><p id="endStats"></p><button id="restart">Watch Ad to Start New Life</button><div class="ending-replays"><button id="replayEnding">Replay Ending</button><button id="replayDay">Replay Day</button></div><button id="closeEnding" hidden>Back to Game (View Other Endings)</button></div></div>
 <div class="modal" id="restartModal" hidden role="dialog" aria-modal="true" aria-labelledby="restartTitle"><div class="modal-card"><h2 id="restartTitle">Restart Today?</h2><p>Today's choices, item changes, and investigations will be undone; progress from previous days will be kept.</p><button id="confirmRestart">Watch Ad to Restart Today</button><button id="cancelRestart">Keep Playing</button></div></div>
@@ -735,22 +737,30 @@ Game.createDemoMotion=(kind,actors,map)=>{
 })();
 
 Game.adConfig = Game.adConfig || {
-  adsgramRewardedBlockId: '', // Fill in your AdsGram Rewarded Block ID, e.g. '1234'
+  adsgramRewardedBlockId: '59675',
+  adsgramTaskBlockId: 'task-59678',
+  adsgramInterstitialBlockId: 'int-59680',
   bannerHtml: '' // Optional: paste your Banner Ad HTML/script snippet (e.g. OnClickA / RichAds)
 };
 
 Game.createAdapter = config => {
   const prefix=config.locale==='en'?`couple-v02-en-${config.target}:`:`couple-v02-${config.target}:`;
   const memory=new Map();
-  let rewardedCtrl=null;
+  let rewardedCtrl=null,interstitialCtrl=null;
   const getRewardedCtrl=()=>{
     const blockId=(Game.adConfig?.adsgramRewardedBlockId||'').trim();
     if(!blockId||!globalThis.Adsgram?.init)return null;
     if(!rewardedCtrl){try{rewardedCtrl=globalThis.Adsgram.init({blockId});}catch{rewardedCtrl=null;}}
     return rewardedCtrl;
   };
+  const getInterstitialCtrl=()=>{
+    const blockId=(Game.adConfig?.adsgramInterstitialBlockId||'').trim();
+    if(!blockId||!globalThis.Adsgram?.init)return null;
+    if(!interstitialCtrl){try{interstitialCtrl=globalThis.Adsgram.init({blockId});}catch{interstitialCtrl=null;}}
+    return interstitialCtrl;
+  };
   return {
-    capabilities:{rewarded:true,interstitial:false},
+    capabilities:{rewarded:true,interstitial:true},
     async init(){
       const tg=globalThis.Telegram?.WebApp;
       if(tg){
@@ -783,7 +793,16 @@ Game.createAdapter = config => {
         return {status:'failed',error:e};
       }
     },
-    async showInterstitial(){return {status:'unavailable'};},
+    async showInterstitial(){
+      const ctrl=getInterstitialCtrl();
+      if(!ctrl)return {status:'unavailable'};
+      try{
+        const res=await ctrl.show();
+        return res&&res.done!==false?{status:'completed'}:{status:'cancelled'};
+      }catch(e){
+        return {status:'failed',error:e};
+      }
+    },
     async get(key){try{return JSON.parse(localStorage.getItem(prefix+key)) ?? memory.get(key) ?? null;}catch{return memory.get(key) ?? null;}},
     async set(key,value){memory.set(key,value);try{localStorage.setItem(prefix+key,JSON.stringify(value));return {persistent:true};}catch{return {persistent:false};}},
     track(){}, lifecycle(){}
@@ -1793,7 +1812,7 @@ Game.createAdapter = config => {
     const s=state();
     if(campaign.finishDay()){
       persist();platform.analytics.track('day_complete',{day:s.day});
-      if(commercial?.canShowInterstitial(s.day)){transitionBusy=true;platform.lifecycle.pause('day-transition');hud();try{await commercial.interstitial(s.day);}finally{transitionBusy=false;platform.lifecycle.resume('day-transition');}}
+      if((s.day>3&&s.day%3===0&&!state().outcome)||commercial?.canShowInterstitial(s.day)){transitionBusy=true;platform.lifecycle.pause('day-transition');hud();try{if(commercial?.canShowInterstitial(s.day))await commercial.interstitial(s.day);else await platform.ads.showInterstitial();}finally{transitionBusy=false;platform.lifecycle.resume('day-transition');}}
       if(state().outcome){showEnding();return;}resetPositions();introStart();
     }
   }
